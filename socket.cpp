@@ -5,15 +5,15 @@ my::Socket::Socket(const sockaddr_in &address)
 	int fd_ = socket(AF_INET, SOCK_DGRAM, 0);
 
 	if (fd_ < 0) {
-		// lanza una excepción si no se logra generar el socket
+		// throw an exception if the socket can't be generated
 		throw std::system_error(errno, std::system_category());
 	}
 
 	int result = bind(fd_, reinterpret_cast<const sockaddr *>(&address), sizeof(address));
 
 	if (result < 0) {
-		// lanza una excepción si no se logra asignar la dirección al socket
-		throw std::system_error(errno, std::system_category());
+		// throw an exception if the address assign cannot be produced
+		throw std::system_error(errno, std::system_category(), std::strerror(errno));
 	}
 }
 
@@ -28,8 +28,8 @@ int my::Socket::send_to(const my::Message &message, const sockaddr_in &address)
 	ssize_t result = sendto(fd_sock, &message, sizeof(message), 0, reinterpret_cast<const sockaddr*>(&address), sizeof(address));
 
 	if (result < 0) {
-		// lanza una excepción si no se logra enviar el mensaje
-		throw std::system_error(errno, std::system_category(), "no se ha podido enviar el mensaje");
+		// throw an exception if the message cannot be sent
+		throw std::system_error(errno, std::system_category(), std::strerror(errno));
 	}
 
 	return 0;
@@ -41,8 +41,8 @@ int my::Socket::recv_from(my::Message &message, sockaddr_in &remote_address)
 	ssize_t result = recvfrom(fd_sock, &message, sizeof(message), 0, reinterpret_cast<sockaddr*>(&remote_address), &src_len);
 
 	if (result < 0) {
-		// lanza una excepción si no se recibir enviar el mensaje
-		throw std::system_error(errno, std::system_category(), "no se ha podido recibir el mensaje");
+		// throw an exception if the message couldn't be received
+		throw std::system_error(errno, std::system_category(), std::strerror(errno));
 	}
 
 	char* remote_ip = inet_ntoa(remote_address.sin_addr);
