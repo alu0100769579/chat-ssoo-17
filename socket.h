@@ -7,26 +7,56 @@
 
 #include <sys/socket.h>     // socket
 #include <sys/types.h>      // uint_32
-#include <netinet/in.h>     // ?
+#include <netinet/in.h>     // sockaddr:in
 #include <arpa/inet.h>      // inet_aton
 #include <cerrno>
 #include <cstring>
 #include <iostream>
-
+#include <unistd.h>
 
 #include "message.h"
 
+
 namespace my
 {
+/**
+ * Socket Class provide an easy way to handle sockets, send and receive messages.
+ */
 class Socket
 {
-	int fd_;
+	int fd_sock; ///< Socket file descriptor
 
 public:
-	Socket() = default;
-	Socket(const std::string &address, const uint16_t &puerto);
-	~Socket() = default;
-	void send_to(const Message &message, const std::string &address, const uint16_t &port);
+
+	/**
+	 * Create a socket with an explicit address
+	 * @param address assigns an address and a port to the socket
+	 */
+	explicit Socket(const sockaddr_in& address);
+
+
+	/**
+	 * Default destructor. Close the file descriptor of socket
+	 */
+	~Socket();
+
+
+	/** TODO: documentar
+	 *
+	 * @param message
+	 * @param address
+	 * @return
+	 */
+	int send_to(const my::Message &message, const sockaddr_in &address);
+
+
+	/** TODO: documentar
+	 *
+	 * @param message
+	 * @param remote_address
+	 * @return
+	 */
+	int recv_from(my::Message &message, sockaddr_in &remote_address);
 };
 }
 
