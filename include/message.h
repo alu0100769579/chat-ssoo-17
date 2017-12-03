@@ -9,7 +9,7 @@ static const size_t size_message = 2048; ///< max length of the message
  */
 struct Message
 {
-	char message[size_message]; ///< content of the message
+	char text[size_message]; ///< content of the message
 	//TODO: qué otros parámetros utilizamos?
 };
 }

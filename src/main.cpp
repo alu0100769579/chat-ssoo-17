@@ -9,36 +9,48 @@
 #include <regex>
 #include <cstdlib>
 
-#include "socket.h"
+#include "../include/socket.h"
 
 static const int ip_len   = 16;
 static const int port_len = 5;
+
+void hola(){
+	std::cout << "HOLA\n";
+	int iasda=3555;
+	sleep(20);
+}
 
 int main (int argc, char** argv)
 {
 //	╔══════════════════════╗
 //	║ Local socket address ║
 //	╚══════════════════════╝
+
+	char port[port_len];
+	char ip_addr[ip_len];
+
+	std::cout << "LOCAL SOCKET DATA\n";
+	std::thread hey(&hola);
+	std::cout << "IP address: ";
+	std::cin >> ip_addr;
+
 	sockaddr_in local_address{};
 
 	local_address.sin_family      = AF_INET;            // TCP/IP Protocol
-	local_address.sin_port        = htons(0);           // OS choose port
-	local_address.sin_addr.s_addr = htonl(INADDR_ANY);  // 0.0.0.0 IP TODO: la IP inicial debe ser INADDR_ANY para local?
-
-	// Show local IP
-//	std::cout << "Dirección IP: " << inet_ntoa(local_address.sin_addr) << '\n'
-//			  << "Puerto: " 	  << ntohs(local_address.sin_port) 	   << "\n\n";
+	local_address.sin_port        = htons(1024);       	// OS choose port
+	inet_aton(ip_addr, &local_address.sin_addr);;  		// 0.0.0.0 IP
+	hey.join();
 
 //	╔═══════════════════════════════════════════╗
 //	║ Ask for data of the remote socket to user ║ TODO: esto se hace así?
 //	╚═══════════════════════════════════════════╝
-	char port[port_len];
-	char ip_addr[ip_len];
 
-	std::cout << "Inserte la dirección IP: ";
+	std::cout << "REMOTE SOCKET DATA\n";
+
+	std::cout << "IP address: ";
 	std::cin >> ip_addr;
 
-	std::cout << "Inserte el puerto: ";
+	std::cout << "Port: ";
 	std::cin >> port;
 
 //	╔═══════════════════════════╗
@@ -62,15 +74,15 @@ int main (int argc, char** argv)
 	sockaddr_in remote_address{};
 
 	remote_address.sin_family = AF_INET;            		// TCP/IP Protocol
-	remote_address.sin_port   = htons(std::stoi(port));		// Assign port defined by user
+	remote_address.sin_port   = htons(static_cast<uint16_t>(std::stoi(port)));		// Assign port defined by user
 	inet_aton(ip_addr, &remote_address.sin_addr);			// IP conversion
 
 //	╔═══════════════════════╗
 //	║ Socket initialization ║
 //	╚═══════════════════════╝
 	try { // TODO: cómo gestiono los sockets si estos se ciñen al ámbito del try?
-		my::Socket local  (local_address);
-		my::Socket remote (remote_address);
+		my::Socket local(local_address);
+		local.run(remote_address);
 	}
 	catch (std::bad_alloc& e) {
 		std::cerr << program_invocation_short_name << ": CRITICAL: " << e.what() << '\n';
@@ -80,6 +92,10 @@ int main (int argc, char** argv)
 		std::cerr << program_invocation_short_name << ": CRITICAL: " << e.what() << '\n';
 		return errno;
 	}
-	// TODO: el destructor no está siendo llamado por alguna razón que desconozco
+	catch (...) {
+		std::cerr << program_invocation_short_name << ": CRITICAL: " << strerror(errno) << '\n';
+		return errno;
+	}
 	return 0;
 }
+

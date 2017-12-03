@@ -24,7 +24,8 @@ namespace my
  */
 class Socket
 {
-	int fd_sock; ///< Socket file descriptor
+	int 		fd_;	///< Socket file descriptor
+	sockaddr_in address_;   ///< Local socket address
 
 public:
 
@@ -40,6 +41,9 @@ public:
 	 */
 	~Socket();
 
+	int get_fd() const;
+	const sockaddr_in &get_address() const;
+
 
 	/** TODO: documentar
 	 *
@@ -47,7 +51,7 @@ public:
 	 * @param address
 	 * @return
 	 */
-	int send_to(const my::Message &message, const sockaddr_in &address);
+	int send_to(const my::Message &message, sockaddr_in &address);
 
 
 	/** TODO: documentar
@@ -56,7 +60,9 @@ public:
 	 * @param remote_address
 	 * @return
 	 */
-	int recv_from(my::Message &message, sockaddr_in &remote_address);
+	int recv_from(sockaddr_in &remote_address);
+
+	void run(sockaddr_in remote_address);
 };
 }
 

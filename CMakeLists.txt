@@ -3,7 +3,7 @@ project(chat_ssoo_17)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(SOURCE_FILES main.cpp socket.cpp socket.h message.h)
+set(SOURCE_FILES src/main.cpp src/socket.cpp include/socket.h include/message.h)
 
 add_executable(chat_ssoo_17 ${SOURCE_FILES})
 
