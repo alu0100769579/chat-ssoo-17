@@ -1,4 +1,4 @@
-#include "../include/socket.h"
+#include "socket.h"
 
 my::Socket::Socket(const sockaddr_in &address) : address_(address)
 {

@@ -9,16 +9,10 @@
 #include <regex>
 #include <cstdlib>
 
-#include "../include/socket.h"
+#include "socket.h"
 
 static const int ip_len   = 16;
 static const int port_len = 5;
-
-void hola(){
-	std::cout << "HOLA\n";
-	int iasda=3555;
-	sleep(20);
-}
 
 int main (int argc, char** argv)
 {
@@ -30,7 +24,6 @@ int main (int argc, char** argv)
 	char ip_addr[ip_len];
 
 	std::cout << "LOCAL SOCKET DATA\n";
-	std::thread hey(&hola);
 	std::cout << "IP address: ";
 	std::cin >> ip_addr;
 
@@ -39,7 +32,6 @@ int main (int argc, char** argv)
 	local_address.sin_family      = AF_INET;            // TCP/IP Protocol
 	local_address.sin_port        = htons(1024);       	// OS choose port
 	inet_aton(ip_addr, &local_address.sin_addr);;  		// 0.0.0.0 IP
-	hey.join();
 
 //	╔═══════════════════════════════════════════╗
 //	║ Ask for data of the remote socket to user ║ TODO: esto se hace así?
