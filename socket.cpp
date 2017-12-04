@@ -1,15 +1,18 @@
+#include <thread>
 #include "socket.h"
 
-my::Socket::Socket(const sockaddr_in &address) : address_(address)
+bool __quit__ = false;
+
+my::Socket::Socket(const sockaddr_in &address)
 {
-	int fd_ = socket(AF_INET, SOCK_DGRAM, 0);
+	fd_ = socket(AF_INET, SOCK_DGRAM, 0);
 
 	if (fd_ < 0) {
 		// throw an exception if the socket can't be generated
 		throw std::system_error(errno, std::system_category());
 	}
 
-	int result = bind(fd_, reinterpret_cast<const sockaddr *>(&address_), sizeof(address_));
+	int result = bind(fd_, reinterpret_cast<const sockaddr *>(&address), sizeof(address));
 
 	if (result < 0) {
 		// throw an exception if the address assign cannot be produced
@@ -23,63 +26,68 @@ my::Socket::~Socket()
 	std::cout << "ejecución del destructor\n";
 }
 
-int my::Socket::send_to(const my::Message &message, sockaddr_in &address)
+void my::Socket::send_to(const sockaddr_in &address)
 {
-	ssize_t result = sendto(fd_, &message, sizeof(message), 0, reinterpret_cast<sockaddr*>(&address), sizeof(address));
+	while (true) {
+		// TODO: como mantengo el prompt de entrada siempre abajo?
+		std::string str;
+		std::getline(std::cin, str);
 
-	if (result < 0) {
-		// throw an exception if the text cannot be sent
-		throw std::system_error(errno, std::system_category());
-}
+		if (str == "quit") {
+			__quit__ = true;
+			return;
+		}
 
-	return 0;
-}
+		char msg[2048];
+		if (str.size() < 2048) {
+			strcpy(msg, str.c_str());
+		}
 
-int my::Socket::recv_from(sockaddr_in &remote_address)
-{
-	Message message{};
-	socklen_t src_len = sizeof(remote_address);
-	ssize_t result = recvfrom(fd_, &message, sizeof(message), 0, reinterpret_cast<sockaddr*>(&remote_address), &src_len);
+		ssize_t result = sendto(fd_, &msg, sizeof(msg), 0, reinterpret_cast<const sockaddr*>(&address), sizeof(address));
 
-	if (result < 0) {
-		// throw an exception if the text couldn't be received
-		throw std::system_error(errno, std::system_category());
+		if (result < 0) {
+			// throw an exception if the text cannot be sent
+			throw std::system_error(errno, std::system_category());
+		}
 	}
-
-	char* remote_ip = inet_ntoa(remote_address.sin_addr);
-	int remote_port = ntohs(remote_address.sin_port);
-	message.text[2048] = '\0';
-	std::cout << "El sistema " << remote_ip << ":" << remote_port
-			  << " envió el mensaje '" << message.text << "'\n";
-
-	return 0;
 }
 
-void my::Socket::run(sockaddr_in remote_address)
+void my::Socket::recv_from(sockaddr_in address)
 {
-	while (1) {
-		char str[size_message];
-		std::cout << "Inserte su mensaje: ";
-		std::cin >> str;
-		str[size_message] = '\0';
-		Message msg{};
-		strncpy(msg.text, str, size_message);
-		send_to(msg, remote_address);
-		recv_from(remote_address);
+	while (true) {
+		if (__quit__) return;
+		char msg[2048];
+		socklen_t src_len = sizeof(address);
+		ssize_t result = recvfrom(fd_, &msg, sizeof(msg), 0, reinterpret_cast<sockaddr*>(&address), &src_len);
+
+		if (result < 0) {
+			// throw an exception if the text cannot be sent
+			throw std::system_error(errno, std::system_category());
+		}
+
+		msg[result] = '\0';
+		std::cout << inet_ntoa(address.sin_addr) <<":" << ntohs(address.sin_port);
+		std::cout << " -> " << (__quit__) ? "el usuario ha abandonado" : msg;
+		std::cout << "\n";
 	}
+}
+
+void my::Socket::run(sockaddr_in &dest_address)
+{
+	my::Message msg {};
+	sockaddr_in remote_address {};
+
+	std::thread send( [=] { send_to(dest_address); } );
+	std::thread recv( [=] { recv_from(remote_address); } );
+
+	send.join();
+	recv.join();
 }
 
 int my::Socket::get_fd() const
 {
 	return fd_;
 }
-
-const sockaddr_in &my::Socket::get_address() const
-{
-	return address_;
-}
-
-
 
 
 

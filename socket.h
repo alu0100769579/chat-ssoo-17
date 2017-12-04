@@ -16,6 +16,7 @@
 
 #include "include/message.h"
 
+extern bool __quit__;
 
 namespace my
 {
@@ -25,7 +26,6 @@ namespace my
 class Socket
 {
 	int 		fd_;	///< Socket file descriptor
-	sockaddr_in address_;   ///< Local socket address
 
 public:
 
@@ -51,7 +51,7 @@ public:
 	 * @param address
 	 * @return
 	 */
-	int send_to(const my::Message &message, sockaddr_in &address);
+	void send_to(const sockaddr_in &address);
 
 
 	/** TODO: documentar
@@ -60,9 +60,8 @@ public:
 	 * @param remote_address
 	 * @return
 	 */
-	int recv_from(sockaddr_in &remote_address);
-
-	void run(sockaddr_in remote_address);
+	void recv_from(sockaddr_in remote_address);
+	void run(sockaddr_in &dest_address);
 };
 }
 
