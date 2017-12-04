@@ -12,11 +12,15 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
+#include <thread>
+#include <pthread.h>
+#include <cxxabi.h>
 #include <unistd.h>
+#include <atomic>
 
 #include "include/message.h"
 
-extern bool __quit__;
+extern std::atomic<bool> __quit__;	///< when true it stops the execution of the recv thread
 
 namespace my
 {
@@ -26,7 +30,6 @@ namespace my
 class Socket
 {
 	int 		fd_;	///< Socket file descriptor
-
 public:
 
 	/**
@@ -40,10 +43,6 @@ public:
 	 * Default destructor. Close the file descriptor of socket
 	 */
 	~Socket();
-
-	int get_fd() const;
-	const sockaddr_in &get_address() const;
-
 
 	/** TODO: documentar
 	 *
@@ -61,7 +60,16 @@ public:
 	 * @return
 	 */
 	void recv_from(sockaddr_in remote_address);
+
+
+	/**
+	 *
+	 * @param dest_address
+	 */
 	void run(sockaddr_in &dest_address);
+
+
+	void request_cancellation(std::thread& thread);
 };
 }
 
