@@ -20,17 +20,23 @@
 
 #include "include/message.h"
 
-extern std::atomic<bool> __quit__;	///< when true it stops the execution of the recv thread
 
 namespace my
 {
+
+extern std::atomic<bool> quit__;	///< when true it stops the execution of the recv thread
+
 /**
  * Socket Class provide an easy way to handle sockets, send and receive messages.
  */
 class Socket
 {
-	int 		fd_;	///< Socket file descriptor
+	int 		fd_;		///< Socket file descriptor
+	static int 	total_;
+	int 		id_;
 public:
+
+	Socket();
 
 	/**
 	 * Create a socket with an explicit address
@@ -69,7 +75,20 @@ public:
 	void run(sockaddr_in &dest_address);
 
 
-	void request_cancellation(std::thread& thread);
+	/**
+	 *
+	 * @param thread
+	 */
+	void request_cancellation(std::thread &thread);
+
+
+	/**
+	 *
+	 * @param rhs
+	 * @return
+	 */
+	Socket & operator=(Socket &&rhs) noexcept;
+
 };
 }
 
