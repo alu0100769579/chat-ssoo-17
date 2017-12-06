@@ -43,16 +43,13 @@ void my::Socket::send_to(const sockaddr_in& address)
 
 		if (str == "\\quit") {
 			quit__ = true;
-			//request_cancellation(thread);
 		}
 
 		char msg[2048];
-		if (str.size() < 2048) {
-			strcpy(msg, str.c_str());
-		}
+		size_t sz = str.copy(msg, str.size());
+		msg[sz] = '\0';
 
-		ssize_t result = sendto(fd_, &msg, sizeof(msg), 0, reinterpret_cast<const sockaddr*>(&address),
-								sizeof(address));
+		ssize_t result = sendto(fd_, &msg, sizeof(msg), 0, reinterpret_cast<const sockaddr*>(&address), sizeof(address));
 
 		if (result < 0) {
 			// throw an exception if the text cannot be sent
@@ -101,7 +98,7 @@ void my::Socket::run(sockaddr_in& dest_address)
 
 		send.join();
 		try {
-			if (quit__) pthread_cancel(recv.native_handle());
+			if (quit__) request_cancellation(recv);
 		}
 		catch (abi::__forced_unwind& e) {
 			std::cout << "abi::__force_unwind catched\n";
