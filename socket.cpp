@@ -1,6 +1,6 @@
 #include "socket.h"
 
-std::atomic<bool> my::quit__ (false);
+std::atomic<bool> my::quit__(false);
 int my::Socket::total_ = 0;
 
 my::Socket::Socket()
@@ -9,7 +9,7 @@ my::Socket::Socket()
 	id_ = total_;
 }
 
-my::Socket::Socket(const sockaddr_in &address)
+my::Socket::Socket(const sockaddr_in& address)
 {
 	total_++;
 	id_ = total_;
@@ -20,7 +20,7 @@ my::Socket::Socket(const sockaddr_in &address)
 		throw std::system_error(errno, std::system_category());
 	}
 
-	int result = bind(fd_, reinterpret_cast<const sockaddr *>(&address), sizeof(address));
+	int result = bind(fd_, reinterpret_cast<const sockaddr*>(&address), sizeof(address));
 
 	if (result < 0) {
 		// throw an exception if the address assign cannot be produced
@@ -34,7 +34,7 @@ my::Socket::~Socket()
 	std::cout << "Ejecución del destructor, instancia " << id_ << "\n";
 }
 
-void my::Socket::send_to(const sockaddr_in &address)
+void my::Socket::send_to(const sockaddr_in& address)
 {
 	while (true) {
 		// TODO: como mantengo el prompt de entrada siempre abajo?
@@ -51,7 +51,8 @@ void my::Socket::send_to(const sockaddr_in &address)
 			strcpy(msg, str.c_str());
 		}
 
-		ssize_t result = sendto(fd_, &msg, sizeof(msg), 0, reinterpret_cast<const sockaddr*>(&address), sizeof(address));
+		ssize_t result = sendto(fd_, &msg, sizeof(msg), 0, reinterpret_cast<const sockaddr*>(&address),
+								sizeof(address));
 
 		if (result < 0) {
 			// throw an exception if the text cannot be sent
@@ -87,9 +88,9 @@ void my::Socket::recv_from(sockaddr_in address)
 	}
 }
 
-void my::Socket::run(sockaddr_in &dest_address)
+void my::Socket::run(sockaddr_in& dest_address)
 {
-	sockaddr_in remote_address {};
+	sockaddr_in remote_address{};
 
 	try {
 		//std::thread recv( [=] { recv_from(remote_address); } );
@@ -99,32 +100,37 @@ void my::Socket::run(sockaddr_in &dest_address)
 		std::thread send(&send_to, this, dest_address);
 
 		send.join();
-		//if (quit__)
+		try {
+			if (quit__) pthread_cancel(recv.native_handle());
+		}
+		catch (abi::__forced_unwind& e) {
+			std::cout << "abi::__force_unwind catched\n";
+		}
+		catch (...) {
+			std::cout << "other exception catched\n";
+		}
 		recv.join();
-	}
-	catch (abi::__forced_unwind&) {
+	} catch (abi::__forced_unwind&) {
 		std::cout << "saliendo del programa\n";
 		return;
-	}
-	catch (...) {
+	} catch (...) {
 		std::cout << "saliendo del programa\n";
 		return;
 	}
 }
 
-my::Socket & my::Socket::operator=(Socket &&rhs) noexcept
+my::Socket& my::Socket::operator=(Socket&& rhs) noexcept
 {
 	fd_ = rhs.fd_;
 	rhs.fd_ = -1;
 	return *this;
 }
 
-void my::Socket::request_cancellation(std::thread &thread)
+void my::Socket::request_cancellation(std::thread& thread)
 {
 	try {
 		pthread_cancel(thread.native_handle());
-	}
-	catch (...) {
+	} catch (...) {
 		std::cerr << program_invocation_short_name << ": " << "Failure to cancel thread: " << strerror(errno) << '\n';
 		throw;
 	}
