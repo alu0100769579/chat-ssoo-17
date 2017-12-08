@@ -18,37 +18,55 @@
 #include <unistd.h>
 #include <atomic>
 
-#include "include/message.h"
+#include "utilities.h"
 
 
 namespace my
 {
-
-extern std::atomic<bool> quit__;	///< when true it stops the execution of the recv thread
+struct Message;
 
 /**
  * Socket Class provide an easy way to handle sockets, send and receive messages.
  */
 class Socket
 {
-	int 		fd_;		///< Socket file descriptor
-	static int 	total_;
-	int 		id_;
+	int fd_;        ///< Socket file descriptor
+	static int total_;        ///<
+	int id_;        ///<
+	static const int max_size_msg = 2048;    ///<
+
 public:
 
+	/**
+	 * Default constructor.
+	 *
+	 * Initialize the socket without any value, only taking into account the number of the instance of the object.
+	 */
 	Socket();
 
+
 	/**
-	 * Create a socket with an explicit address
-	 * @param address assigns an address and a port to the socket
+	 * Move constructor
+	 * @param rhs
+	 */
+	Socket(Socket&& rhs) noexcept;
+
+	/**
+	 * Create a socket with an explicit address.
+	 * @param address assigns an address and a port to the socket.
 	 */
 	explicit Socket(const sockaddr_in& address);
 
 
+	Socket(const Socket&) = delete;
+	Socket operator=(const Socket&) = delete;
+
 	/**
-	 * Default destructor. Close the file descriptor of socket
+	 * Default destructor.
+	 *
+	 * Close the file descriptor of socket.
 	 */
-	~Socket();
+	~Socket() noexcept;
 
 	/** TODO: documentar
 	 *
@@ -56,30 +74,16 @@ public:
 	 * @param address
 	 * @return
 	 */
-	void send_to(const sockaddr_in &address);
+	void send_to(const sockaddr_in& address, const Message& message) const;
 
 
 	/** TODO: documentar
 	 *
 	 * @param message
-	 * @param remote_address
+	 * @param recv_address
 	 * @return
 	 */
-	void recv_from(sockaddr_in remote_address);
-
-
-	/**
-	 *
-	 * @param dest_address
-	 */
-	void run(sockaddr_in &dest_address);
-
-
-	/**
-	 *
-	 * @param thread
-	 */
-	void request_cancellation(std::thread &thread);
+	void recv_from(sockaddr_in& recv_address, Message& message) const;
 
 
 	/**
@@ -87,7 +91,11 @@ public:
 	 * @param rhs
 	 * @return
 	 */
-	Socket & operator=(Socket &&rhs) noexcept;
+	Socket& operator=(Socket&& rhs) noexcept;
+
+	int get_fd() const;
+
+	void set_fd(const int& fd);
 
 };
 }
