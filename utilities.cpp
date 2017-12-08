@@ -2,15 +2,15 @@
 
 void my::sender(const Socket& sock, const sockaddr_in& dest_address, std::atomic_bool& quit)
 {
-	while (!quit) {
-		// TODO: como mantengo el prompt de entrada siempre abajo?
-		// TODO: en la primera ejecución siempre envía un salto de línea
-		std::string str;
-		std::getline(std::cin, str);
+	// Avoid \n in the first iteration
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-		if (str == "\\quit") {
+	while (!quit) {
+		std::string str;
+		std::getline(std::cin, str); 	// TODO: How do I keep the input prompt always down?
+
+		if (str == "\\quit")
 			quit = true;
-		}
 
 		my::Message message {};
 
@@ -37,7 +37,7 @@ void my::receiver(const Socket& sock, sockaddr_in& recv_address, std::atomic_boo
 			std:: cout << ( strcmp(message.text, "\\quit") == 0 ? "\033[1;33mEl usuario ha abandonado\033[0m" : message.text ) << '\n';
 		}
 	}
-	catch (abi::__forced_unwind& e) {
+	catch (abi::__forced_unwind& e) { // TODO: doesn't work, abi it's not being catched
 		std::cout << "abi::__forced_unwind catched\n";
 		std::cout << std::flush;
 		std::cin.get();
@@ -49,6 +49,6 @@ void my::request_cancellation(std::thread& thread)
 	int result = pthread_cancel(thread.native_handle());
 	if (result != 0) {
 		std::cerr << program_invocation_short_name << ": " << "Failure to cancel thread: " << result << '\n';
-		throw;
+		throw; // TODO: this throw isn't working, it calls std::terminate for some reason
 	}
 }

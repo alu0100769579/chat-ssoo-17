@@ -6,7 +6,6 @@
 #include <thread>
 #include <atomic>
 
-
 #include "socket.h"
 #include "utilities.h"
 
@@ -31,10 +30,9 @@ int main ()
 	dest_address.sin_addr.s_addr = htonl(INADDR_ANY); 						// 0.0.0.0 IP
 
 	sockaddr_in recv_address {};
-
 	my::Socket socketA;
-
 	std::atomic_bool quit(false);
+
 	try {
 		socketA = my::Socket(server_address);
 		std::thread recv(&my::receiver, std::ref(socketA), std::ref(recv_address), std::ref(quit));

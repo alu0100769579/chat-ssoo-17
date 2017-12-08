@@ -29,7 +29,7 @@ struct Message
 	size_t size_text;
 	size_t size_user;
 };
-class Socket;
+class Socket; // TODO: por qué.
 void sender(const Socket& sock, const sockaddr_in& dest_address, std::atomic_bool& quit);
 void receiver(const Socket& sock, sockaddr_in& recv_address, std::atomic_bool& quit);
 void request_cancellation(std::thread& thread);
