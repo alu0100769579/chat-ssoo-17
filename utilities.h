@@ -1,5 +1,5 @@
-#ifndef CHAT_SSOO_17_MESSAGE_H
-#define CHAT_SSOO_17_MESSAGE_H
+#ifndef CHAT_SSOO_17_UTILITIES_H
+#define CHAT_SSOO_17_UTILITIES_H
 
 #include <string>
 #include <thread>
@@ -10,7 +10,6 @@
 #include <iostream>
 #include <cstring>
 #include <atomic>
-
 
 #include "socket.h"
 
@@ -35,4 +34,4 @@ void receiver(const Socket& sock, sockaddr_in& recv_address, std::atomic_bool& q
 void request_cancellation(std::thread& thread);
 }
 
-#endif //CHAT_SSOO_17_MESSAGE_H
+#endif //CHAT_SSOO_17_UTILITIES_H

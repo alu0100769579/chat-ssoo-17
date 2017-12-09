@@ -47,8 +47,7 @@ void my::receiver(const Socket& sock, sockaddr_in& recv_address, std::atomic_boo
 void my::request_cancellation(std::thread& thread)
 {
 	int result = pthread_cancel(thread.native_handle());
-	if (result != 0) {
-		std::cerr << program_invocation_short_name << ": " << "Failure to cancel thread: " << result << '\n';
-		throw; // TODO: this throw isn't working, it calls std::terminate for some reason
-	}
+	if (result != 0)
+		throw std::system_error(result, std::system_category(), "Failure to cancel thread");
+	// TODO: this throw isn't working, getting SIGABRT for some reason
 }

@@ -1,7 +1,3 @@
-//
-// Created by Francisco Cruz on 28/11/2017.
-//
-
 #ifndef CHAT_SSOO_17_SOCKET_H
 #define CHAT_SSOO_17_SOCKET_H
 
@@ -20,74 +16,67 @@
 
 #include "utilities.h"
 
-
 namespace my
 {
 struct Message;
 
 /**
- * Socket Class provide an easy way to handle sockets, send and receive messages.
+ * The Socket class is responsible for creating, destroying and
+ * using the sockets for sending and receiving messages.
  */
 class Socket
 {
-	int fd_;        ///< Socket file descriptor
-	static int total_;        ///<
-	int id_;        ///<
-	static const int max_size_msg = 2048;    ///<
+	int fd_;        			///< Socket file descriptor
+	static int total_;        	///< Number of instances of the class
+	int id_;        			///< Unique identifier of the instance
 
 public:
 
 	/**
 	 * Default constructor.
-	 *
 	 * Initialize the socket without any value, only taking into account the number of the instance of the object.
 	 */
 	Socket();
 
-
 	/**
 	 * Move constructor
-	 * @param rhs
+	 * @param rhs it's the right hand side element from which data is extracted and invalidated.
 	 */
 	Socket(Socket&& rhs) noexcept;
 
 	/**
-	 * Create a socket with an explicit address.
-	 * @param address assigns an address and a port to the socket.
+	 * Create a socket with a specific address.
+	 * @param server_address contains the IP address and port to be assigned to the socket
 	 */
-	explicit Socket(const sockaddr_in& address);
+	explicit Socket(const sockaddr_in& server_address);
 
 
 	Socket(const Socket&) = delete;
 	Socket operator=(const Socket&) = delete;
 
 	/**
-	 * Default destructor.
-	 *
-	 * Close the file descriptor of socket.
+	 * @brief Default destructor. Close the socket file descriptor.
 	 */
 	~Socket() noexcept;
 
-	/** TODO: documentar
-	 *
-	 * @param message
-	 * @param address
-	 * @return
+	/**
+	 * @brief Send a my::Message struct to a specific address and port
+	 * @param message it's a my::Message type, containing the message and the user who send it.
+	 * @param dest_address contains the IP address and the port to which messages should be transmitted.
 	 */
-	void send_to(const sockaddr_in& address, const Message& message) const;
+	void send_to(const sockaddr_in& dest_address, const Message& message) const;
 
 
-	/** TODO: documentar
-	 *
-	 * @param message
-	 * @param recv_address
-	 * @return
+	/**
+	 * @brief Receive a message of type my::Message
+	 * @param recv_address contains the address and the port from the issuing user
+	 * @param message contains the message among other data about the issuing user
 	 */
 	void recv_from(sockaddr_in& recv_address, Message& message) const;
 
 
 	/**
-	 *
+	 * Move assignment operator
 	 * @param rhs
 	 * @return
 	 */

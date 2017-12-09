@@ -4,37 +4,30 @@ int my::Socket::total_ = 0;
 
 my::Socket::Socket()
 {
-	total_++;
-	id_ = total_;
+	id_ = ++total_;
 }
 
-my::Socket::Socket(my::Socket&& rhs) noexcept
+my::Socket::Socket(my::Socket&& rhs) noexcept : fd_(rhs.fd_)
 {
-	total_++;
-	id_ = total_;
-
-	fd_ = rhs.fd_;
+	id_ = ++total_;
 	rhs.fd_ = -1;
 }
 
-my::Socket::Socket(const sockaddr_in& address)
+my::Socket::Socket(const sockaddr_in& server_address)
 {
-	total_++;
-	id_ = total_;
+	id_ = ++total_;
 
 	fd_ = socket(AF_INET, SOCK_DGRAM, 0);
 
-	if (fd_ < 0) {
-		// throw an exception if the socket can't be generated
+	// throw an exception if the socket can't be generated
+	if (fd_ < 0)
 		throw std::system_error(errno, std::system_category());
-	}
 
-	int result = bind(fd_, reinterpret_cast<const sockaddr*>(&address), sizeof(address));
+	int result = bind(fd_, reinterpret_cast<const sockaddr*>(&server_address), sizeof(server_address));
 
-	if (result < 0) {
-		// throw an exception if the address assign cannot be produced
+	// throw an exception if the server_address assign cannot be produced
+	if (result < 0)
 		throw std::system_error(errno, std::system_category());
-	}
 }
 
 my::Socket::~Socket()
@@ -53,11 +46,11 @@ void my::Socket::set_fd(const int& fd)
 	Socket::fd_ = fd;
 }
 
-void my::Socket::send_to(const sockaddr_in& address, const Message& message) const
+void my::Socket::send_to(const sockaddr_in& dest_address, const Message& message) const
 {
 	ssize_t result = sendto(fd_, &message, sizeof(message), 0,
-							reinterpret_cast<const sockaddr*>(&address),
-							sizeof(address));
+							reinterpret_cast<const sockaddr*>(&dest_address),
+							sizeof(dest_address));
 
 	// throw an exception if the text cannot be sent
 	if (result < 0)
