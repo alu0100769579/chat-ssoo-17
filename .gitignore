@@ -5,6 +5,9 @@
 cmake-build-debug/
 .idea/
 
+# Documentation
+Doxyfile
+
 # Compiled Object files
 *.slo
 *.lo
