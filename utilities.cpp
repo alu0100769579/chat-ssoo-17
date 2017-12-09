@@ -37,10 +37,13 @@ void my::receiver(const Socket& sock, sockaddr_in& recv_address, std::atomic_boo
 			std:: cout << ( strcmp(message.text, "\\quit") == 0 ? "\033[1;33mEl usuario ha abandonado\033[0m" : message.text ) << '\n';
 		}
 	}
-	catch (abi::__forced_unwind& e) { // TODO: doesn't work, abi it's not being catched
-		std::cout << "abi::__forced_unwind catched\n";
-		std::cout << std::flush;
-		std::cin.get();
+	catch (abi::__forced_unwind& e) {
+		std::cout << "abi::__forced_unwind catched" << std::endl;
+		throw;
+	}
+	catch (...) {
+		std::cout << "some other thing catched in receiver" << std::endl;
+		throw;
 	}
 }
 
