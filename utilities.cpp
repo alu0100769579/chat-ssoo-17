@@ -34,7 +34,9 @@ void my::receiver(const Socket& sock, sockaddr_in& recv_address, std::atomic_boo
 			std::cout << inet_ntoa(recv_address.sin_addr) << ":" << ntohs(recv_address.sin_port);
 			std::cout << " -> ";
 
-			std:: cout << ( strcmp(message.text, "\\quit") == 0 ? "\033[1;33mEl usuario ha abandonado\033[0m" : message.text ) << '\n';
+			std:: cout << ( strcmp(message.text, "\\quit") == 0 ?
+							"\033[1;33mEl usuario ha abandonado\033[0m" : message.text )
+					   << '\n';
 		}
 	}
 	catch (abi::__forced_unwind& e) {
@@ -47,10 +49,7 @@ void my::receiver(const Socket& sock, sockaddr_in& recv_address, std::atomic_boo
 	}
 }
 
-void my::request_cancellation(std::thread& thread)
+int my::request_cancellation(std::thread& thread)
 {
-	int result = pthread_cancel(thread.native_handle());
-	if (result != 0)
-		throw std::system_error(result, std::system_category(), "Failure to cancel thread");
-	// TODO: this throw isn't working, getting SIGABRT for some reason
+	return pthread_cancel(thread.native_handle());
 }

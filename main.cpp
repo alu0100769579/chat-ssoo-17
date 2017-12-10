@@ -32,26 +32,46 @@ int main ()
 	sockaddr_in recv_address {};
 	my::Socket socketA;
 	std::atomic_bool quit(false);
+	std::thread recv;
+	std::thread send;
 
 	try {
 		socketA = my::Socket(server_address);
-		std::thread recv(&my::receiver, std::ref(socketA), std::ref(recv_address), std::ref(quit));
-		std::thread send(&my::sender, std::ref(socketA), std::ref(dest_address), std::ref(quit));
+		recv = std::thread(&my::receiver, std::ref(socketA), std::ref(recv_address), std::ref(quit));
+		send = std::thread(&my::sender, std::ref(socketA), std::ref(dest_address), std::ref(quit));
 		send.join();
 		if (quit) // TODO: realmente el quit no es necesario no?
 			my::request_cancellation(recv);
 		recv.join();
 	}
 	catch (const std::bad_alloc& e) {
-		std::cerr << program_invocation_short_name << ": CRITICAL: " << e.what() << '\n';
+		std::cerr << program_invocation_short_name << ": CRITICAL: " << e.what() << std::endl;
+		// TODO: find a better fix for this
+		if (recv.joinable() || send.joinable()) {
+			my::request_cancellation(send);
+			my::request_cancellation(recv);
+		}
+		recv.join();
 		return errno;
 	}
 	catch (const std::system_error& e) {
-		std::cerr << program_invocation_short_name << ": CRITICAL: " << e.what() << '\n';
+		std::cerr << program_invocation_short_name << ": CRITICAL: " << e.what() << std::endl;
+		// TODO: find a better fix for this
+		if (recv.joinable() || send.joinable()) {
+			my::request_cancellation(send);
+			my::request_cancellation(recv);
+		}
+		recv.join();
 		return errno;
 	}
 	catch (...) {
-		std::cerr << program_invocation_short_name << ": CRITICAL: " << strerror(errno) << '\n';
+		std::cerr << program_invocation_short_name << ": CRITICAL: " << strerror(errno) << std::endl;
+		// TODO: find a better fix for this
+		if (recv.joinable() || send.joinable()) {
+			my::request_cancellation(send);
+			my::request_cancellation(recv);
+		}
+		recv.join();
 		return errno;
 	}
 

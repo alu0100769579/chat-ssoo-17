@@ -7,7 +7,8 @@ my::Socket::Socket()
 	id_ = ++total_;
 }
 
-my::Socket::Socket(my::Socket&& rhs) noexcept : fd_(rhs.fd_)
+my::Socket::Socket(my::Socket&& rhs) noexcept
+		: fd_(rhs.fd_)
 {
 	id_ = ++total_;
 	rhs.fd_ = -1;
@@ -33,7 +34,7 @@ my::Socket::Socket(const sockaddr_in& server_address)
 my::Socket::~Socket()
 {
 	close(fd_);
-	std::cout << "Ejecución del destructor, instancia " << id_ << "\n";
+	std::cout << "Ejecución del destructor, instancia " << id_ << std::endl;
 }
 
 int my::Socket::get_fd() const
